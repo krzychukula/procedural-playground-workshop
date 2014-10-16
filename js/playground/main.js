@@ -72,6 +72,23 @@ var Earthlike = function() {
         })
 
 
+        var variationMap = procgen.simplexNoise(20, 1, 1);
+        var half = textureHeight / 2;
+        var temperatureMap = procgen.makeFloatMap([heightMap, variationMap], function(height, variation, x, y){
+          if(height < 0) return -10;
+          var nearHalf = half - Math.abs(y);
+          var halfTemp = lerp(nearHalf, half, 0, -30, 50);
+          var heightTemp = lerp(-height, -1, 0, -60, 0);
+
+          return halfTemp + heightTemp + 15 * variation ;
+        });
+
+        // we temporarily switch to showing the temperature instead of actual color
+        var colorMap = procgen.makeRGBMap([temperatureMap], function (temp) {
+            var blueness = clamp(lerp(temp, 10.0, -30.0, 0, 255), 0, 255); // blue when cold
+            var redness = clamp(lerp(temp, 10.0, 50.0, 0, 255), 0, 255); // red when hot
+            return rgb(redness, 64, blueness);
+        });
 
 
         return {
