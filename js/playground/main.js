@@ -23,7 +23,7 @@ var Earthlike = function() {
           var rawHeightMap = procgen.simplexNoise(Math.random()*400, Math.random()*20, 1);
         }else{
           // the textures we are going to generate will all be returned from here
-          var rawHeightMap = procgen.simplexNoise(200, 4, 1);
+          var rawHeightMap = procgen.simplexNoise(200, 5, 1);
         }
 
         var heightMap = procgen.makeFloatMap([rawHeightMap], function(height){
@@ -50,6 +50,27 @@ var Earthlike = function() {
           return 1.0 + displacementSize * height;
         })
 
+        var bumpMappingHardness = 0.1 * displacementSize;
+        var bumpMap = procgen.makeRGBMap(function(x,y){
+          // calculate coordinates of our neighbours, wrapping correctly
+          var left = (x + textureWidth - 1) % textureWidth, right = (x + 1) % textureWidth;
+          var up = (y + textureHeight - 1) % textureHeight, down = (y + 1) % textureHeight;
+
+          // get the height at our left, right, upper, lower neighbour
+          var hL = displacementMap.get(left,y), hR = displacementMap.get(right, y),
+              hU = displacementMap.get(x,up), hD = displacementMap.get(x, down);
+
+          // calculate how much slope we have, and in which direction
+          // this is clamped to (-1,1) so we never go past vertical :)
+          var xTilt = clamp( (hR - hL) / bumpMappingHardness, -1.0, 1.0),
+              yTilt = clamp( (hU - hD) / bumpMappingHardness, -1.0, 1.0);
+
+          // translate this into R and G component for the bump map
+          // x tilt is stored in red, y tilt is stored in green
+          var r = lerp(xTilt, -1.0, 1.0, 0, 255), g = lerp(yTilt, -1.0, 1.0, 0, 255);
+          return rgb(r, g, 0);
+        })
+
 
 
 
@@ -57,7 +78,7 @@ var Earthlike = function() {
             // we use boring defaults for everything, but we'll write something better soon!
             colorMap: colorMap,//procgen.defaultColorMap(),
             displacementMap: displacementMap,
-            bumpMap: procgen.defaultBumpMap(),
+            bumpMap: bumpMap,
             lightMap: procgen.defaultLightMap()
         };
     }
