@@ -120,20 +120,28 @@ var Earthlike = function() {
 
         // color constants
         var WaterShallow = rgb(24, 24, 126), WaterDeep = rgb(0, 0, 60),
-            GrassColor = rgb(60, 120, 60), SandColor = rgb(220, 180, 100),
+            GrassColor = rgb(20, 80, 20),
+            LushColor = rgb(120, 150, 120),
+            SandColor = rgb(220, 180, 100),
             SnowColor = rgb(220, 220, 255), RockColor = rgb(170, 150, 130);
 
         // generate based on terrain type
-        var colorMap = procgen.makeRGBMap([terrainMap, heightMap], function(terrain, height) {
+        var colorMap = procgen.makeRGBMap([terrainMap, heightMap], function(terrain, height, x, y) {
             switch(terrain) {
                 case WATER: return colorLerp(height, -1.0, 0.0, WaterDeep, WaterShallow);
 
-                case GRASS: return GrassColor;
+                case GRASS: return grass(x,y);
                 case SAND: return SandColor;
                 case SNOW: return SnowColor;
                 case ROCK: return RockColor;
             }
         });
+
+        function grass(x,y){
+          var temp = temperatureMap.get(x,y);
+          var variation = variationMap.get(x,y);
+          return colorLerp(temp + 50 * variation, -5, 60, LushColor, GrassColor)
+        }
 
 
         // generate based on terrain type
