@@ -72,15 +72,15 @@ var Earthlike = function() {
         })
 
 
-        var variationMap = procgen.simplexNoise(20, 2, 1);
+        var variationMap = procgen.simplexNoise(20, 3, 1);
         var half = textureHeight / 2;
         var temperatureMap = procgen.makeFloatMap([heightMap, variationMap], function(height, variation, x, y){
           if(height < 0) return -10;
           var nearHalf = half - Math.abs(y);
           var equatorTemp = lerp(nearHalf, half, 0, -25, 50);
-          var heightTemp = lerp(-height, -1, 0, -80, 0);
-
-          return equatorTemp + heightTemp + 100 * variation ;
+          var heightTemp = lerp(-height, -1, 0, -100, 0);
+          var variationTemp = 40 * variation;
+          return equatorTemp + heightTemp + variationTemp ;
         });
 
         // we temporarily switch to showing the temperature instead of actual color
