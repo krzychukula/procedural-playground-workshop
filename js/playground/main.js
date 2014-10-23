@@ -77,8 +77,8 @@ var Earthlike = function() {
         var temperatureMap = procgen.makeFloatMap([heightMap, variationMap], function(height, variation, x, y){
           if(height < 0) return -10;
           var nearHalf = half - Math.abs(y);
-          var halfTemp = lerp(nearHalf, half, 0, -30, 50);
-          var heightTemp = lerp(-height, -1, 0, -60, 0);
+          var halfTemp = lerp(nearHalf, half, 0, -25, 50);
+          var heightTemp = lerp(-height, -1, 0, -70, 0);
 
           return halfTemp + heightTemp + 15 * variation ;
         });
