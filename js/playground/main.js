@@ -3,7 +3,7 @@ var Earthlike = function() {
     // We will be using 2048x1024 textures.
     var textureWidth = 2048, textureHeight = 1024;
 
-    var waterLevel = 0.2;
+    var waterLevel = 0.12;
     var displacementSize = 0.2;
 
     // ProcGen is a helper object we will be using to generate those textures.
@@ -23,7 +23,7 @@ var Earthlike = function() {
           var rawHeightMap = procgen.simplexNoise(Math.random()*400, Math.random()*20, 1);
         }else{
           // the textures we are going to generate will all be returned from here
-          var rawHeightMap = procgen.simplexNoise(200, 5, 1);
+          var rawHeightMap = procgen.simplexNoise(200, 6, 1);
         }
 
         var heightMap = procgen.makeFloatMap([rawHeightMap], function(height){
@@ -72,15 +72,15 @@ var Earthlike = function() {
         })
 
 
-        var variationMap = procgen.simplexNoise(20, 1, 1);
+        var variationMap = procgen.simplexNoise(20, 2, 1);
         var half = textureHeight / 2;
         var temperatureMap = procgen.makeFloatMap([heightMap, variationMap], function(height, variation, x, y){
           if(height < 0) return -10;
           var nearHalf = half - Math.abs(y);
-          var halfTemp = lerp(nearHalf, half, 0, -25, 50);
-          var heightTemp = lerp(-height, -1, 0, -70, 0);
+          var equatorTemp = lerp(nearHalf, half, 0, -25, 50);
+          var heightTemp = lerp(-height, -1, 0, -80, 0);
 
-          return halfTemp + heightTemp + 15 * variation ;
+          return equatorTemp + heightTemp + 100 * variation ;
         });
 
         // we temporarily switch to showing the temperature instead of actual color
