@@ -34,14 +34,14 @@ var Earthlike = function() {
           }
         })
 
-        var colorMap = procgen.makeRGBMap([heightMap], function(height){
-          if(height < 0){
-            return colorLerp(height, -1.0, 0, rgb(20,20,120), rgb(0, 0, 200));
-          }else{
-            return colorLerp(height, 0, 1.0, rgb(50,150,50), rgb(55, 255, 55));
-          }
-
-        });
+        // var colorMap = procgen.makeRGBMap([heightMap], function(height){
+        //   if(height < 0){
+        //     return colorLerp(height, -1.0, 0, rgb(20,20,120), rgb(0, 0, 200));
+        //   }else{
+        //     return colorLerp(height, 0, 1.0, rgb(50,150,50), rgb(55, 255, 55));
+        //   }
+        //
+        // });
 
         var displacementMap = procgen.makeFloatMap([heightMap], function(height){
           if(height < 0 ){
@@ -91,19 +91,31 @@ var Earthlike = function() {
         var SNOW = 3;
         var WATER = 4;
 
-        var terrainMap = procgen.makeIntMap([heightMap, temperatureMap], function(height, temp){
+        var terrainMap = procgen.makeIntMap([heightMap, temperatureMap, bumpMap], function(height, temp, bumpColor){
           // below sea level?
           if (height < 0.0) return WATER;
 
+          var tilt = getXTilt(bumpColor) + getYTilt(bumpColor);
+
           var snowChance = clamp(lerp(temp, 1, -8.0, 0, 1), 0, 1);
           var isRock = clamp(lerp(height, 0.25, 0.35, 0, 1), 0, 1);
-          var rockChance = clamp(isRock - snowChance, 0, 1);
+
+          var isSteep = clamp(lerp(tilt, 270, 290, 0, 1), 0, 1);
+          var rockChance = clamp(isRock + isSteep - snowChance, 0, 1);
+          
           var sandChance = clamp(lerp(temp, 28, 40, 0, 1), 0, 1);
           var grassChance = 1.0 - snowChance - rockChance - sandChance;
 
           // pick one of them
           return fuzzyPick([grassChance, sandChance, rockChance, snowChance])
         });
+
+        function getXTilt(color) {
+            return color & 0x000000FF;
+        }
+        function getYTilt(color) {
+            return (color & 0x0000FF00) >> 8;
+        }
 
 
         // color constants
