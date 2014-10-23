@@ -83,11 +83,44 @@ var Earthlike = function() {
           return equatorTemp + heightTemp + variationTemp ;
         });
 
-        // we temporarily switch to showing the temperature instead of actual color
-        var colorMap = procgen.makeRGBMap([temperatureMap], function (temp) {
-            var blueness = clamp(lerp(temp, 10.0, -30.0, 0, 255), 0, 255); // blue when cold
-            var redness = clamp(lerp(temp, 10.0, 50.0, 0, 255), 0, 255); // red when hot
-            return rgb(redness, 64, blueness);
+
+
+        var GRASS = 0;
+        var SAND = 1;
+        var ROCK = 2;
+        var SNOW = 3;
+        var WATER = 4;
+
+        var terrainMap = procgen.makeIntMap([heightMap, temperatureMap], function(height, temp){
+          // below sea level?
+          if (height < 0.0) return WATER;
+
+          var snowChance = clamp(lerp(temp, 1, -8.0, 0, 1), 0, 1);
+          var isRock = clamp(lerp(height, 0.25, 0.35, 0, 1), 0, 1);
+          var rockChance = clamp(isRock - snowChance, 0, 1);
+          var sandChance = clamp(lerp(temp, 28, 40, 0, 1), 0, 1);
+          var grassChance = 1.0 - snowChance - rockChance - sandChance;
+
+          // pick one of them
+          return fuzzyPick([grassChance, sandChance, rockChance, snowChance])
+        });
+
+
+        // color constants
+        var WaterShallow = rgb(24, 24, 126), WaterDeep = rgb(0, 0, 60),
+            GrassColor = rgb(60, 120, 60), SandColor = rgb(220, 180, 100),
+            SnowColor = rgb(220, 220, 255), RockColor = rgb(180, 160, 140);
+
+        // generate based on terrain type
+        var colorMap = procgen.makeRGBMap([terrainMap, heightMap], function(terrain, height) {
+            switch(terrain) {
+                case WATER: return colorLerp(height, -1.0, 0.0, WaterDeep, WaterShallow);
+
+                case GRASS: return GrassColor;
+                case SAND: return SandColor;
+                case SNOW: return SnowColor;
+                case ROCK: return RockColor;
+            }
         });
 
 
