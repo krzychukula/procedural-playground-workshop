@@ -77,7 +77,7 @@ var Earthlike = function() {
         var temperatureMap = procgen.makeFloatMap([heightMap, variationMap], function(height, variation, x, y){
           if(height < 0) return -10;
           var nearHalf = half - Math.abs(y);
-          var equatorTemp = lerp(nearHalf, half, 0, -25, 50);
+          var equatorTemp = lerp(nearHalf, half, 0, -20, 50);
           var heightTemp = lerp(-height, -1, 0, -100, 0);
           var variationTemp = 40 * variation;
           return equatorTemp + heightTemp + variationTemp ;
@@ -97,13 +97,13 @@ var Earthlike = function() {
 
           var tilt = getXTilt(bumpColor) + getYTilt(bumpColor);
 
-          var snowChance = clamp(lerp(temp, 1, -8.0, 0, 1), 0, 1);
-          var isRock = clamp(lerp(height, 0.25, 0.35, 0, 1), 0, 1);
+          var snowChance = clamp(lerp(temp, 1, -10.0, 0, 1), 0, 1);
+          var isRock = clamp(lerp(height, 0.27, 0.35, 0, 1), 0, 1);
 
-          var isSteep = clamp(lerp(tilt, 270, 290, 0, 1), 0, 1);
+          var isSteep = clamp(lerp(tilt, 280, 290, 0, 1), 0, 1);
           var rockChance = clamp(isRock + isSteep - snowChance, 0, 1);
-          
-          var sandChance = clamp(lerp(temp, 28, 40, 0, 1), 0, 1);
+
+          var sandChance = clamp(lerp(temp, 32, 40, 0, 1), 0, 1);
           var grassChance = 1.0 - snowChance - rockChance - sandChance;
 
           // pick one of them
@@ -121,7 +121,7 @@ var Earthlike = function() {
         // color constants
         var WaterShallow = rgb(24, 24, 126), WaterDeep = rgb(0, 0, 60),
             GrassColor = rgb(60, 120, 60), SandColor = rgb(220, 180, 100),
-            SnowColor = rgb(220, 220, 255), RockColor = rgb(180, 160, 140);
+            SnowColor = rgb(220, 220, 255), RockColor = rgb(170, 150, 130);
 
         // generate based on terrain type
         var colorMap = procgen.makeRGBMap([terrainMap, heightMap], function(terrain, height) {
@@ -136,12 +136,27 @@ var Earthlike = function() {
         });
 
 
+        // generate based on terrain type
+        var lightMap = procgen.makeRGBMap([terrainMap], function(terrain) {
+          var ambient = 150;
+            switch(terrain) {
+              //ambient/diffuse/specular
+                case WATER: return rgb(200, 200, 70);
+
+                case GRASS: return rgb(ambient, 50, 18);
+                case SAND: return rgb(ambient, 50, 20);
+                case SNOW: return rgb(ambient, 100, 60);
+                case ROCK: return rgb(ambient, 80, 30);
+            }
+        });
+
+
         return {
             // we use boring defaults for everything, but we'll write something better soon!
             colorMap: colorMap,//procgen.defaultColorMap(),
             displacementMap: displacementMap,
             bumpMap: bumpMap,
-            lightMap: procgen.defaultLightMap()
+            lightMap: lightMap
         };
     }
 
